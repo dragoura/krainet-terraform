@@ -83,12 +83,16 @@ ansible:
     - pip install --no-input --upgrade pip
     - pip install --no-input ansible==9.5.1 paramiko==3.4.0
     - apt-get update && apt-get install -y --no-install-recommends openssh-client && rm -rf /var/lib/apt/lists/*
-    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - eval $(ssh-agent -s)
     - |
-      printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' | base64 -d > ~/.ssh/id_ed25519_digitalocean
-      chmod 600 ~/.ssh/id_ed25519_digitalocean
-      ssh-add ~/.ssh/id_ed25519_digitalocean
+      set -e
+      if [ -f "$ANSIBLE_SSH_PRIVATE_KEY" ]; then
+        ssh-add "$ANSIBLE_SSH_PRIVATE_KEY"
+      elif printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | grep -q "BEGIN .*PRIVATE KEY"; then
+        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+      else
+        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' | base64 -d | ssh-add -
+      fi
   script:
     - |
       set -euo pipefail
