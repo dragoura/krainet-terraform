@@ -7,6 +7,7 @@ stages:
   - validate
   - plan
   - apply
+  - ansible
   - destroy
 
 variables:
@@ -63,6 +64,7 @@ apply:
   script:
     - terraform apply -input=false -auto-approve "$TF_PLAN_FILE"
   artifacts:
+    when: always
     paths:
       - "$TF_DIR/terraform.tfstate"
       - "$TF_DIR/terraform.tfstate.backup"
@@ -70,9 +72,49 @@ apply:
   environment:
     name: infra-prod
 
+ansible:
+  stage: ansible
+  needs: ["apply"]
+  image:
+    name: python:3.12-slim
+    entrypoint: [""]
+  before_script:
+    - python --version
+    - pip install --no-input --upgrade pip
+    - pip install --no-input ansible==9.5.1 paramiko==3.4.0
+    - apt-get update && apt-get install -y --no-install-recommends openssh-client && rm -rf /var/lib/apt/lists/*
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - eval $(ssh-agent -s)
+    - |
+      if [ -n "$ANSIBLE_SSH_PRIVATE_KEY" ]; then
+        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519_digitalocean
+        chmod 600 ~/.ssh/id_ed25519_digitalocean
+        ssh-add ~/.ssh/id_ed25519_digitalocean
+      else
+        echo "No ANSIBLE_SSH_PRIVATE_KEY provided";
+      fi
+  script:
+    - |
+      set -euo pipefail
+      export ANSIBLE_HOST_KEY_CHECKING=False
+      ansible --version
+      cd ansible
+      ansible-playbook main.yaml -vvv | tee ansible-output.log
+  artifacts:
+    when: always
+    paths:
+      - "ansible/ansible-output.log"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
 destroy:
   stage: destroy
   <<: *before_tf
+  needs:
+    - job: apply
+      artifacts: true
+  dependencies:
+    - apply
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   when: manual
