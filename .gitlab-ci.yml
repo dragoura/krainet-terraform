@@ -104,7 +104,7 @@ ansible:
       set -euo pipefail
       export ANSIBLE_HOST_KEY_CHECKING=False
       cd ansible
-      ansible-playbook -i inventory.ini -u root main.yaml
+      ansible-playbook -i inventory.ini -u root main.yaml -e new_user_ssh_public_key="$ANSIBLE_PUBLIC_KEY"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
 

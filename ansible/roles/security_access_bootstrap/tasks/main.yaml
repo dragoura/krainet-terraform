@@ -10,7 +10,7 @@
   ansible.posix.authorized_key:
     user: "{{ new_user_name }}"
     state: present
-    key: "{{ lookup('file', new_user_ssh_public_key_path) }}" 
+    key: "{{ new_user_ssh_public_key }}"
 
 - name: Configure passwordless sudo for the new user 
   ansible.builtin.lineinfile:
