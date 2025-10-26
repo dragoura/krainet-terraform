@@ -23,7 +23,7 @@ variable "size" {
 }
 variable "image" {
   type    = string
-  default = "ubuntu-22-04-x64"
+  default = "ubuntu-24-04-x64"
 }
 variable "ssh_key_fingerprint" { type = string }
 variable "domain" { type = string }
