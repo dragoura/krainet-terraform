@@ -26,14 +26,14 @@ variable "image" {
   default = "ubuntu-24-04-x64"
 }
 variable "ssh_key_fingerprint" { type = string }
-variable "domain" { type = string } 
+variable "domain" { type = string }
 variable "hostname" {
   type    = string
   default = "krainet"
 }
 variable "record_name" {
   type    = string
-  default = "@" 
+  default = "@"
 }
 
 resource "digitalocean_droplet" "app" {
