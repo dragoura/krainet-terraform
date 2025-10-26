@@ -78,11 +78,8 @@ destroy:
   when: manual
   allow_failure: true
   script:
-    - terraform destroy -input=false -auto-approve \
+  - |
+      terraform destroy -input=false -auto-approve \
         -var "do_token=$DIGITALOCEAN_TOKEN" \
         -var "ssh_key_fingerprint=$DO_SSH_KEY_FINGERPRINT" \
-        -var "region=${DO_REGION:-fra1}" \
-        -var "size=${DO_SIZE:-s-1vcpu-1gb}" \
-        -var "image=${DO_IMAGE:-ubuntu-22-04-x64}" \
-        -var "domain=$DNS_DOMAIN" \
-        -var "subdomain=${DNS_SUBDOMAIN:-krainet}"
+        -var "domain=$DNS_DOMAIN" 
