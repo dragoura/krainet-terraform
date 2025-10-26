@@ -26,14 +26,18 @@ variable "image" {
   default = "ubuntu-24-04-x64"
 }
 variable "ssh_key_fingerprint" { type = string }
-variable "domain" { type = string }
-variable "subdomain" {
+variable "domain" { type = string } 
+variable "hostname" {
   type    = string
   default = "krainet"
 }
+variable "record_name" {
+  type    = string
+  default = "@" 
+}
 
 resource "digitalocean_droplet" "app" {
-  name   = "${var.subdomain}.${var.domain}"
+  name   = var.hostname
   region = var.region
   size   = var.size
   image  = var.image
@@ -46,7 +50,7 @@ resource "digitalocean_droplet" "app" {
 }
 
 resource "digitalocean_firewall" "app_fw" {
-  name = "${var.subdomain}-fw"
+  name = "${var.hostname}-fw"
 
   droplet_ids = [digitalocean_droplet.app.id]
 
@@ -86,7 +90,7 @@ data "digitalocean_domain" "root" {
 resource "digitalocean_record" "app_a" {
   domain = data.digitalocean_domain.root.name
   type   = "A"
-  name   = var.subdomain
+  name   = var.record_name
   value  = digitalocean_droplet.app.ipv4_address
   ttl    = 60
 }
