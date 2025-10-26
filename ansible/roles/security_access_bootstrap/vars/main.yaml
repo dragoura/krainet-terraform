@@ -1,5 +1,4 @@
 ---
 new_user_name: "deployuser"
 new_user_groups: "sudo" 
-new_user_ssh_public_key: ""
 enable_passwordless_sudo: true 

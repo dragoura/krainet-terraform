@@ -88,23 +88,13 @@ ansible:
     - eval $(ssh-agent -s)
     - |
       set -e
-      if [ -f "$ANSIBLE_SSH_PRIVATE_KEY" ]; then
-        if grep -q "BEGIN .*PRIVATE KEY" "$ANSIBLE_SSH_PRIVATE_KEY"; then
-          tr -d '\r' < "$ANSIBLE_SSH_PRIVATE_KEY" | ssh-add -
-        else
-          tr -d '\r' < "$ANSIBLE_SSH_PRIVATE_KEY" | base64 -d | ssh-add -
-        fi
-      elif printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | grep -q "BEGIN .*PRIVATE KEY"; then
-        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-      else
-        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' | base64 -d | ssh-add -
-      fi
+      tr -d '\r' < "$ANSIBLE_SSH_PRIVATE_KEY" | base64 -d | ssh-add -
   script:
     - |
       set -euo pipefail
       export ANSIBLE_HOST_KEY_CHECKING=False
       cd ansible
-      ansible-playbook -i inventory.ini -u root main.yaml -e new_user_ssh_public_key="$ANSIBLE_PUBLIC_KEY"
+      ansible-playbook -i inventory.ini -u root main.yaml
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
 
