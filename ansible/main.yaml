@@ -9,6 +9,6 @@
   
 - name: Install docker
   hosts: workers
-  gather_facts: no   
+  gather_facts: yes  
   roles:
     - docker_install

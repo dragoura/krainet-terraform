@@ -3,7 +3,6 @@
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
-  when: ansible_os_family == 'Debian'
 
 - name: Install required packages
   ansible.builtin.apt:
@@ -14,20 +13,17 @@
       - apt-transport-https
       - software-properties-common
     state: present
-  when: ansible_os_family == 'Debian'
 
 - name: Add Docker GPG key
   ansible.builtin.apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
-  when: ansible_distribution == 'Ubuntu'
 
 - name: Add Docker apt repository
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
     filename: docker
-  when: ansible_distribution == 'Ubuntu'
 
 - name: Install Docker engine and compose plugin
   ansible.builtin.apt:
@@ -39,7 +35,6 @@
       - docker-compose-plugin
     state: present
     update_cache: yes
-  when: ansible_os_family == 'Debian'
 
 - name: Ensure Docker service is enabled and started
   ansible.builtin.service:
