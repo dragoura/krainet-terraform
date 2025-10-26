@@ -18,7 +18,7 @@ variable "size"     { type = string  default = "s-1vcpu-1gb" }
 variable "image"    { type = string  default = "ubuntu-22-04-x64" }
 variable "ssh_key_fingerprint" { type = string }
 variable "domain" { type = string }
-variable "subdomain" { type = string  default = "app" }
+variable "subdomain" { type = string  default = "krainet" }
 
 resource "digitalocean_droplet" "app" {
   name   = "${var.subdomain}.${var.domain}"

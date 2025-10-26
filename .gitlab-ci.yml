@@ -49,7 +49,7 @@ plan:
         -var "size=${DO_SIZE:-s-1vcpu-1gb}" \
         -var "image=${DO_IMAGE:-ubuntu-22-04-x64}" \
         -var "domain=$DNS_DOMAIN" \
-        -var "subdomain=${DNS_SUBDOMAIN:-app}"
+        -var "subdomain=${DNS_SUBDOMAIN:-krainet}"
   artifacts:
     paths:
       - "$TF_DIR/$TF_PLAN_FILE"
@@ -87,4 +87,4 @@ destroy:
         -var "size=${DO_SIZE:-s-1vcpu-1gb}" \
         -var "image=${DO_IMAGE:-ubuntu-22-04-x64}" \
         -var "domain=$DNS_DOMAIN" \
-        -var "subdomain=${DNS_SUBDOMAIN:-app}"
+        -var "subdomain=${DNS_SUBDOMAIN:-krainet}"
