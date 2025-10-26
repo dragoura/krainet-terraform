@@ -87,11 +87,15 @@ ansible:
     - eval $(ssh-agent -s)
     - |
       if [ -n "$ANSIBLE_SSH_PRIVATE_KEY" ]; then
-        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_ed25519_digitalocean
+        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY" | tr -d '\r' | base64 -d > ~/.ssh/id_ed25519_digitalocean
+        chmod 600 ~/.ssh/id_ed25519_digitalocean
+        ssh-add ~/.ssh/id_ed25519_digitalocean
+      elif [ -n "$ANSIBLE_SSH_PRIVATE_KEY_RAW" ]; then
+        printf "%s" "$ANSIBLE_SSH_PRIVATE_KEY_RAW" | tr -d '\r' > ~/.ssh/id_ed25519_digitalocean
         chmod 600 ~/.ssh/id_ed25519_digitalocean
         ssh-add ~/.ssh/id_ed25519_digitalocean
       else
-        echo "No ANSIBLE_SSH_PRIVATE_KEY provided";
+        echo "No ANSIBLE_SSH_PRIVATE_KEY (base64) or ANSIBLE_SSH_PRIVATE_KEY_RAW provided";
       fi
   script:
     - |
