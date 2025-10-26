@@ -1,0 +1,90 @@
+image: hashicorp/terraform:1.7.5
+
+stages:
+  - fmt
+  - validate
+  - plan
+  - apply
+  - destroy
+
+variables:
+  TF_DIR: "."
+  TF_PLAN_FILE: "plan.tfplan"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG-terraform"
+  paths:
+    - .terraform/
+    - ${TF_DIR}/.terraform/
+
+.before_tf: &before_tf
+  before_script:
+    - cd "$TF_DIR"
+    - terraform --version
+    - terraform init -input=false
+
+fmt:
+  stage: fmt
+  <<: *before_tf
+  script:
+    - terraform fmt -check -recursive
+
+validate:
+  stage: validate
+  <<: *before_tf
+  needs: ["fmt"]
+  script:
+    - terraform validate
+
+plan:
+  stage: plan
+  <<: *before_tf
+  needs: ["validate"]
+  script:
+    - terraform workspace select default || terraform workspace new default
+    - terraform plan -input=false -out="$TF_PLAN_FILE" \
+        -var "do_token=$DIGITALOCEAN_TOKEN" \
+        -var "ssh_key_fingerprint=$DO_SSH_KEY_FINGERPRINT" \
+        -var "region=${DO_REGION:-fra1}" \
+        -var "size=${DO_SIZE:-s-1vcpu-1gb}" \
+        -var "image=${DO_IMAGE:-ubuntu-22-04-x64}" \
+        -var "domain=$DNS_DOMAIN" \
+        -var "subdomain=${DNS_SUBDOMAIN:-app}"
+  artifacts:
+    paths:
+      - "$TF_DIR/$TF_PLAN_FILE"
+    expire_in: 1 week
+
+apply:
+  stage: apply
+  <<: *before_tf
+  needs: ["plan"]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+  script:
+    - terraform apply -input=false -auto-approve "$TF_PLAN_FILE"
+  artifacts:
+    paths:
+      - "$TF_DIR/terraform.tfstate"
+      - "$TF_DIR/terraform.tfstate.backup"
+    expire_in: 1 week
+  environment:
+    name: infra-prod
+
+destroy:
+  stage: destroy
+  <<: *before_tf
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+  allow_failure: true
+  script:
+    - terraform destroy -input=false -auto-approve \
+        -var "do_token=$DIGITALOCEAN_TOKEN" \
+        -var "ssh_key_fingerprint=$DO_SSH_KEY_FINGERPRINT" \
+        -var "region=${DO_REGION:-fra1}" \
+        -var "size=${DO_SIZE:-s-1vcpu-1gb}" \
+        -var "image=${DO_IMAGE:-ubuntu-22-04-x64}" \
+        -var "domain=$DNS_DOMAIN" \
+        -var "subdomain=${DNS_SUBDOMAIN:-app}"
