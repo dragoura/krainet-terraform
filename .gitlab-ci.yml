@@ -10,7 +10,7 @@ stages:
   - destroy
 
 variables:
-  TF_DIR: "."
+  TF_DIR: "terraform"
   TF_PLAN_FILE: "plan.tfplan"
 
 cache:
