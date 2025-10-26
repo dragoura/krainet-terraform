@@ -13,12 +13,24 @@ provider "digitalocean" {
 }
 
 variable "do_token" { type = string }
-variable "region"   { type = string  default = "fra1" }
-variable "size"     { type = string  default = "s-1vcpu-1gb" }
-variable "image"    { type = string  default = "ubuntu-22-04-x64" }
+variable "region" {
+  type    = string
+  default = "fra1"
+}
+variable "size" {
+  type    = string
+  default = "s-1vcpu-1gb"
+}
+variable "image" {
+  type    = string
+  default = "ubuntu-22-04-x64"
+}
 variable "ssh_key_fingerprint" { type = string }
 variable "domain" { type = string }
-variable "subdomain" { type = string  default = "krainet" }
+variable "subdomain" {
+  type    = string
+  default = "krainet"
+}
 
 resource "digitalocean_droplet" "app" {
   name   = "${var.subdomain}.${var.domain}"
