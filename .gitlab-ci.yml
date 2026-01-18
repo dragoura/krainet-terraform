@@ -93,6 +93,7 @@ ansible:
     - |
       set -euo pipefail
       export ANSIBLE_HOST_KEY_CHECKING=False
+      export ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
       cd ansible
       ansible-playbook -i inventory.ini -u root main.yaml
   rules:
